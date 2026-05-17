@@ -1,0 +1,224 @@
+Схема опкодов и мнемоник ассемблера. Общая для всех расширений / Scheme of opcodes and assembler mnemonics. Common to all extensions
+x86 - identical operation principle as with x86 / принцип работы такой же, как и у x86
+The standard imm length at which maximum performance is achieved depends on the extension. For RSM32e2v, the standard length is 32 bits. For RSM64e2v, the standard length is 64 bits, but both architectures support both 32 imm and 64 imm with different performance.
+Длина стандартная imm при которой достигается максимальная производительность зависит от расширения. Для RSM32e2v стандартная длина составляет 32 бита. Для RSM64e2v стандартная длина составляет 64 бита, но все типы архитектур поддерживают как и 32 imm так и 64 imm но с разной производительностью.
+
+Типы данных
+imm - прямое значение
+reg - значение из регистра
+address - непосредственное значение, значение адреса из метки
+
+Data types
+imm - immediate value
+reg - register value
+address - immediate value, address value from label
+
+nop - No operation
+mov reg, imm - standard move
+mov reg, reg
+mov reg, address
+mov address, reg
+load reg, address - alternative writing of load through mov, loads data from memory at address / альтернативное написание загрузки через mov, загружает данные из памяти по адресу
+load reg, reg
+store address, reg - alternative way of saving using mov, saves data from memory at the address /  альтернативное написание сохранения через mov, сохраняет данные из памяти по адресу
+store reg, reg
+pop imm - x86 pop
+pop reg 
+pop address
+push imm - x86 push
+push reg
+push address
+add reg, imm - add x86
+add reg, reg
+sub reg, imm - sub x86
+sub reg, reg
+mul reg, imm - mul x86
+mul reg, reg
+div reg, imm - div x86
+div reg, reg
+shl reg, imm - shl x86
+shl reg, reg
+shr reg, imm - shr x86
+shr reg, reg
+cmp reg, imm - cmp x86
+cmp reg, reg
+and reg, imm - and x86
+and reg, reg
+xor reg, imm - xor x86
+xor reg, reg
+or reg, imm - or x86
+or reg, reg
+sigadd reg, imm - Addition with a sign / Сложение со знаком
+sigadd reg, reg
+sigsub reg, imm - Signed subtraction / Вычитание со знаком
+sigsub reg, reg
+imul reg, imm - imul x86
+imul reg, reg
+idiv reg, imm - idiv x86
+idiv reg, reg
+jmp imm - jmp x86
+jmp reg
+jz imm - jz x86
+jz reg
+je imm - je x86
+je reg
+jnz imm - jne x86
+jnz reg
+js imm - js x86
+js reg
+jg imm - jg x86
+jg reg
+jge imm - jge x86
+jge reg
+jo imm - jo x86
+jo reg
+jno imm - jno x86
+jno reg
+jp imm - x86 jp
+jp reg
+jpe imm - x86 jpe
+jpe reg
+jnp imm - x86 jnp
+jnp reg
+jns imm - x86 jns
+jns reg
+int imm - interrupts invoke
+int reg
+call imm - call func
+call reg
+ret - return from func
+iret - return from interrupts
+sti - on Io interrupts
+cli - off Io interrupts
+sci - set call invoke interrupts mode
+cci - clear call invoke interrupts mode
+lidt reg - load idt address 
+lidt imm
+srci - set flag return from stack register on iret
+crsi - clear flag return from stack register on iret
+out reg, imm - x86 out
+out reg, reg
+out imm, reg
+in reg, imm - x86 in
+in reg, reg
+in imm, reg
+setrw reg, imm - set system register value
+setrw reg, reg
+setrr reg, imm - get system register value
+setrr reg, reg
+callsys imm - call, but set ss(RING) in 0
+callsys reg
+setbus imm - Выбор шины IO/Choosing the IO bus
+setbus reg
+atomIoLC - req to IO bus, to loc
+atomIoUL - unlock bus
+debaghlta - only for chip debagger. Performs HLT if the debug address is reached/ Выполняет HLT если достигнут адрес отладки. Только для отладки ядра
+debaghlts - set off debagger
+hlt - stop core
+cpuid reg, imm - get info on core
+cpuid reg, reg
+sysret - return from kernel sys func
+atomMemLc - lock mem Bus
+atomMemUc - unlock mem Bus
+
+An example of a simple BIOS code/Пример простого кода BIOS
+#RSM32E2V
+nop
+jmp str_
+str_: 	;IC init
+;Disabling other cores/Отключение других ядер
+setrr R3, 0x8
+cmp R3, 0x00
+jz load_init
+hlt
+;The function of copying data from ROM to RAM/Функция копирования данных из ROM в RAM 
+load_init:
+mov R0, 0x0
+mov R1, end_load_cycle
+mov R2, 0x1000000
+mov R3, 0x1000f00
+add R3, 0x30
+out R3, 0xff
+cmp R3, 0x30
+;boot cycle
+load_cycle:
+    load R0, R1
+    store R2, R0
+    add R1, 0x4
+    add R2, 0x4
+    cmp R1, 0x3FC
+    jns mor_smp
+    jmp load_cycle
+;Additional terms and conditions/Дополнительные условия
+mor_smp:
+    cmp R1, 0x3FC
+    jz 0x1000000
+    jmp load_cycle
+end_load_cycle:
+    nop
+;Start of BIOS code/Начало кода биос
+#org 0x1000000
+start:
+    ;Initializing interrupts/Инициализация прерываний
+    sci
+    srsi
+    sti
+    lidt intTable
+    ;Chipset setup, shadow ROM/Настройка чипсета, теневая ROM 
+    mov R0, 0x04
+    out R0, 0x22
+    ;Setting up registers and stack/Настройка регистров, стека
+    mov R1, 0x0
+    mov R2, 0x0
+    mov R3, 0x0
+    mov R5, 0x1002000
+    mov R7, 0x1003000
+update:
+    ;Main loop/Главный цикл
+    in R0, 0xff
+    out R0, 0xff
+    mov R0, 0x0
+    jmp update
+
+;Interrupt table, interrupt code/Таблица прерываний, код прерываний
+Ret_:
+    ret
+IntOne:
+    in R0, 0xff
+    cmp R0, 0x0a
+    jz Ret_
+    out R0, 0xff
+    mov R0, 0x0
+    jmp IntOne
+intTable:
+    jmp IntOne
+
+RUS
+Типы опкодов
+x16 без imm
+b0 - b7 байт опкода
+b8- b15 байт системной информации (кодировка регистров, флаги, длина imm)
+x32 imm 2 байта
+b0 - b7 байт опкода
+b8- b15 байт системной информации (кодировка регистров, флаги, длина imm)
+b16 - b31 imm
+x64 imm 4 байта
+b0 - b7 байт опкода
+b8- b15 байт системной информации (кодировка регистров, флаги, длина imm)
+b16 - b31 байт расширения системной информации (дополнительный адрес регистров, флаги)
+b32 - b63 imm
+
+END
+Opcode Types
+x16 without imm
+b0-b7 bytes of opcode
+b8-b15 bytes of system information (register encoding, flags, imm length)
+x32 imm 2 bytes
+b0-b7 bytes of opcode
+b8-b15 bytes of system information (register encoding, flags, imm length)
+b16-b31 imm
+x64 imm 4 bytes
+b0-b7 bytes of opcode
+b8-b15 bytes of system information (register encoding, flags, imm length)
+b16-b31 bytes of system information extension (additional register address, flags)
+b32-b63 imm

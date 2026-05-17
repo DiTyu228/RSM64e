@@ -1,0 +1,65 @@
+0x00000000 - 0x00ffffff - Bios Data Code/Bios Rom
+0x01000000 - 0x01ffffff - (Dual buffer vram)
+	0x01000000 - 0x016fffff - text
+	0x01700000 - 0x01ffffff - grafics
+>0x02000000 - ram
+ENG
+ISA IO ports
+0x22 - North chipset config
+0xff - text in/out debag UART bus
+
+RUS
+Порты ввода-вывода ISA
+0x22 - Конфигурация северного чипсета
+0xff - Текстовая входная/выходная шина отладки UART
+
+Nord chipset config params:
+bit 2 - remap rom to ram 1 ram/0 rom
+
+RUS
+Порты ввода-вывода ISA
+0x22 - конфигурация набора микросхем 
+0xff - настройка ввода-вывода текста по шине UART
+
+Параметры конфигурации набора микросхем Nord:
+бит 2 - переназначение rom в ram 1 ram/0 rom
+
+Configuration and addressing/Конфигурация и адресация
+
+ENG
+Memory is organized and structured at different levels
+From the level with the most privileges. Up to the level of user applications
+
+Level 0
+Global memory, it is accessible to all cores, the interrupt table and the OS kernel code are stored there, the system register G_ADR_start indicates the beginning of the linear memory addressing, and G_ADR_end indicates the end
+
+Level 1
+Core/thread memory is a memory region dedicated to a specific processor core or processor core thread. It stores local kernel/thread data; global memory cannot be accessed from this level without special privileges. The linear address of the beginning of this range is specified in T_ADR_start, and the end in T_ADR_end.
+
+Level 2
+Process memory is a memory area dedicated to the operating system process. It has the least privileges; global memory and processor kernel thread memory cannot be accessed from it. The linear address of the beginning of this memory area is in the P_ADR_start system register, and the end is in P_ADR_end.
+
+RU
+Память организована и структурирована на разных уровнях.
+Начиная с уровня с наибольшими привилегиями и заканчивая уровнем пользовательских приложений.
+
+Уровень 0
+Глобальная память, доступная всем ядрам; в ней хранятся таблица прерываний и код ядра ОС; системный регистр G_ADR_start указывает начало линейной адресации памяти, а G_ADR_end — конец.
+
+Уровень 1
+Память ядра/потока — это область памяти, выделенная для конкретного ядра процессора или потока ядра процессора. В ней хранятся локальные данные ядра/потока; доступ к глобальной памяти с этого уровня невозможен без специальных привилегий. Линейный адрес начала этого диапазона указывается в T_ADR_start, а конца — в T_ADR_end.
+
+Уровень 2
+Память процесса — это область памяти, выделенная для процесса операционной системы. Она имеет наименьшие привилегии; доступ к глобальной памяти и памяти потоков ядра процессора с нее невозможен. Линейный адрес начала этой области памяти находится в системном регистре P_ADR_start, а конца — в P_ADR_end.
+
+MMU functionality/функционал MMU
+
+ENG
+The MMU function is to remap virtual addresses to physical ones.
+Note: MMU is only supported in processor cores with the b+ instruction set and RSM64e2v.
+Remapping is primarily tied to memory segments and privilege levels. For level 0, virtual addresses span the range of global memory + thread memory + process memory. For level 1, this spans thread memory + process memory. For level 2, this spans only process memory.
+
+RU
+Функция MMU предназначена для переназначения виртуальных адресов на физические.
+Примечание: MMU поддерживается только в ядрах с набором инструкций B+ и RSM64e2v.
+Переназначение в основном связано с сегментами памяти и уровнями привилегий. Для уровня 0 виртуальные адреса охватывают диапазон глобальной памяти + памяти потока + памяти процесса. Для уровня 1 это потока + память процесса. Для уровня 2 это только память процесса.

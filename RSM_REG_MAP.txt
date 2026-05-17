@@ -1,0 +1,85 @@
+General registers / общие регистры
+Standart Rsm32e2v ISA/Стандартная Rsm32e2v архитектура
+Name/Имя x86 analog/х86 аналог Bit len/Разрядность Specification/Спецификация
+R0 	 EAX		       x32		   General/общий
+R1 	 EAX		       x32		   General/общий
+R2 	 EAX		       x32      	   General/общий
+R3 	 EAX		       x32		   General/общий
+R4 	 EAX		       x32		   General/общий
+R5 	 EBP		       x32		   General/общий, Stack Base Pointer/Указатель основания стека
+R6 	 EAX		       x32		   General/общий
+R7 	 ESP		       x32		   General/общий,   Stack Pointer/Указатель стека
+T0/R8	 EAX		       x32		   General/общий,   API call arguments/аргументы API вызова
+T1/R9	 EAX		       x32		   General/общий,   API call arguments/аргументы API вызова
+T2/R10	 EAX		       x32		   General/общий,   API call arguments/аргументы API вызова
+T3/R11	 EAX		       x32		   General/общий,   API call arguments/аргументы API вызова
+T4/R12	 EAX		       x32		   General/общий,   API call arguments/аргументы API вызова
+T5/R13	 EAX		       x32		   General/общий,   API call arguments/аргументы API вызова
+T6/R14	 EAX		       x32		   General/общий,   API call arguments/аргументы API вызова
+T7/R15	 EAX		       x32		   General/общий,   API call arguments/аргументы API вызова
+FLR 	 EFLAGS		       x32		   Flag register/Регистр флагов
+IC 	 EIP		       x32		   Address generate register/Регистр генерации адресов
+
+x64 bit extend (RSM64e2v)/64 битное расширение (RSM64e2v)
+ER0 	 RAX		       x64		   General/общий
+ER1 	 RAX		       x64		   General/общий
+ER2 	 RAX		       x64      	   General/общий
+ER3 	 RAX		       x64		   General/общий
+ER4 	 RAX		       x64		   General/общий
+ER5 	 RBP		       x64		   General/общий, Stack Base Pointer/Указатель основания стека
+ER6 	 RAX		       x64		   General/общий
+ER7 	 RSP		       x64		   General/общий,   Stack Pointer/Указатель стека
+ET0/ER8	 RAX		       x64		   General/общий,   API call arguments/аргументы API вызова
+ET1/ER9	 RAX		       x64		   General/общий,   API call arguments/аргументы API вызова
+ET2/ER10 RAX		       x64		   General/общий,   API call arguments/аргументы API вызова
+ET3/ER11 RAX		       x64		   General/общий,   API call arguments/аргументы API вызова
+ET4/ER12 RAX		       x64		   General/общий,   API call arguments/аргументы API вызова
+ET5/ER13 RAX		       x64		   General/общий,   API call arguments/аргументы API вызова
+ET6/ER14 RAX		       x64		   General/общий,   API call arguments/аргументы API вызова
+ET7/ER15 RAX		       x64		   General/общий,   API call arguments/аргументы API вызова
+EFLR 	 RFLAGS		       x64		   Flag register/Регистр флагов
+EIC 	 RIP		       x64		   Address generate register/Регистр генерации адресов
+
+
+System registers available through setrr and setrw/Системные регистры доступные через setrr и setrw
+
+Name/Имя     id/Номер x86 analog/х86 аналог  Bit len/Разрядность Specification/Спецификация
+G_ADR_start  0x0      -                      x32		 Global memory start pointer/Указатель начала глобальной памяти
+G_ADR_end    0x1      -                      x32		 Global memory end pointer/Указатель конца глобальной памяти
+T_ADR_start  0x2      -                      x32		 Thread memory start pointer/Указатель начала памяти потока
+T_ADR_end    0x3      -                      x32		 Thread memory end pointer/Указатель конца памяти потока
+PID32        0x4      -                      x32		 Process id/Процесс ид
+P_ADR_start  0x5      -                      x32		 Process memory start pointer/Указатель начала памяти процесса
+P_ADR_end    0x6      -                      x32		 Process memory end pointer/Указатель конца памяти процесса
+RINGx4       0x7      SS                     x4 		 protective ring id/ид кольца защиты
+CORE_IDx16   0x8      -                      x16		 Core id (read only)/ид ядра или потока (только чтение)
+DR0          0x9      DR0                    x32		 Debug register/регистр отладчика
+DR1          0xA      DR1                    x32		 Debug register/регистр отладчика
+DR2          0xB      DR2                    x32		 Debug register/регистр отладчика
+DR3          0xC      DR3                    x32		 Debug register/регистр отладчика
+
+x64 bit extend (RSM64e2v)/64 битное расширение (RSM64e2v)
+G_ADR_start  0x0      -                      x64		 Global memory start pointer/Указатель начала глобальной памяти
+G_ADR_end    0x1      -                      x64		 Global memory end pointer/Указатель конца глобальной памяти
+T_ADR_start  0x2      -                      x64		 Thread memory start pointer/Указатель начала памяти потока
+T_ADR_end    0x3      -                      x64		 Thread memory end pointer/Указатель конца памяти потока
+PID32        0x4      -                      x32		 Process id/Процесс ид
+P_ADR_start  0x5      -                      x64		 Process memory start pointer/Указатель начала памяти процесса
+P_ADR_end    0x6      -                      x64		 Process memory end pointer/Указатель конца памяти процесса
+RINGx4       0x7      SS                     x4 		 protective ring id/ид кольца защиты
+CORE_IDx16   0x8      -                      x16		 Core id (read only)/ид ядра или потока (только чтение)
+DR0          0x9      DR0                    x64		 Debug register/регистр отладчика
+DR1          0xA      DR1                    x64		 Debug register/регистр отладчика
+DR2          0xB      DR2                    x64		 Debug register/регистр отладчика
+DR3          0xC      DR3                    x64		 Debug register/регистр отладчика
+
+Flags/Флаги
+Name/имя Mask/Маска x86 analog/х86 аналог Condition/Условие                              Specification/Спецификация
+CR       0x0        CF                    add and sub carry/add и sub перенос            Carry/перенос
+PR       0x4        PF                    Parity flag/Флаг чётности                      Parity/чётность
+AR       0x10       AF                    Half-carry flag/Флаг дополнительного переноса  BCD operation/BCD операции
+ZR       0x10       ZF                    Operation value is 0/значение операции равно 0 Zero value/Нулевое значение
+SR       0x80       SF                    Result sign/Знак результата                    Sign flag/флаг знака
+EIF      0x200      IF                    Instructions/Инструкции                        Interrupt masking/Маскировка прерываний
+OVF      0x800      OF                    Result overflow/Переполнение результата        Overflow/Переполнение
+NTF      0x4000     NT                    Calls, interruption/Вызовы, прерывание         Task nesting/Вложенность задачи
