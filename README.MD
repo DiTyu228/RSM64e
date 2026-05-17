@@ -1,1 +1,1 @@
-The RSM64e is a new advanced CPU architecture designed for maximum performance per core, as well as energy efficiency. It is based on the principle of RISC / CISC and EPIC architectures to create maximum performance per clock cycle, thereby increasing the energy efficiency and performance of a single core.
+RSM E2V is a family of RISC-like 32/64-bit processor cores with a shadow interrupt system, hardware memory isolation, and hybrid multithreading.
