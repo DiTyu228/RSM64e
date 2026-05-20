@@ -1,0 +1,142 @@
+RU
+Реализация ядра на прямую зависит от выбора целевой архитектуры семейства, а так же его функционала, в зависимости от функционала существует ранжирование по типу архитектур и целевой производительности
+
+Таблица ядер (цифры приведены для тех процесса 120 нм на CMOS транзисторах, и являются примерными)
+
+| Тип ядра | Архитектура | Производительности |  Энергопотребление    |    Тактовая частота    |Колво транзисторов| Описание
+|	   |RSM32e|RSM64E|(Инструкций на такт)|	 (ВТ)		      |    (МГц)               |(тысяч)           |
+-----------------------------------------------------------------------------------------------------------------------------
+|    A	   | YES  |  NO  |x32 1	    |x64   0.5|(Энерго)0.7|(Произв)3  |(Энерго)250|(Произв)600 |70 000            |Для мобильных устройств и устройств интернета вещей не предполагает большой производительности
+-----------------------------------------------------------------------------------------------------------------------------
+|    B	   | YES  |  NO  |x32 2	    |x64     1|(Энерго)1  |(Произв)7  |(Энерго)300|(Произв)1100|150 000           |Среднее решение для мобильных телефонов и носимых устройств, предполагает среднюю производительность и среднее энергопотребление
+-----------------------------------------------------------------------------------------------------------------------------
+|    С	   | YES  |  YES |x32 6	    |x64     2|(Энерго)3  |(Произв)27 |(Энерго)600|(Произв)2000|1 000 000         |Для производительных устройств и серверов
+
+Конвейер ядра разделяется на 2 типа каждый из которых применяется для декодирования инструкций 32 и 64 битной длинны от количества конвейеров зависть производительность ядра и энергопотребление
+
+Стадии конвейера
+
+| Fetch | Queue | Queue extend | Pipe select | Decode | Exec | Writeback | 
+
+Fetch - Стадия загрузки. Стадия на которой инструкция достаётся из кэша L1
+Queue - Очередь инструкций. Промежуточная стадия на которой инструкции хранятся пока конвейер находиться в остановке при выполнении много тактовых инструкций
+Queue extend - Дополнительная стадия очереди в случае если очередь переполнена пропускается в случае наличия свободного места в очереди
+Pipe select - На этой стадии происходит выборка на какому декодеру передать инструкцию, 32 или 64 битному
+Exec - Исполнение. На этой стадии происходит вычисление и выполнение инструкции
+Writeback - Стадия на которой результаты выполнения и/или вычисления записываются обратно
+
+Ядра выполнены в RISC дизайне и требуют очень высокого количества памяти по сравнению с x86, а так же качества сборки инструкций компилятором для сравнения код
+
+MOV R0, 0x1
+MOV R1, 0x1
+ADD R1, R0
+
+В x86 займёт 5 байт, а в RSM e2v 10 байт, что примерно в два раза больше из за использования RISC концепции против CISC, но позволяющий получить высокую производительность и энергоэфективности
+Главная концепция архитектуры это перераспределение максимального количества ресурсов на непосредственные исполнители и вычислители с максимальным упрощением декодирования и конвейера
+
+Прерывания
+Прерывания выполнены через механизм табличной адресации в виде специального регистра RIDT который хранит адрес на таблицу прерываний при вызове прерывания ядро берёт из памяти адрес перехода по принципу RIDT + вектор прерывания после сохраняет в стек все регистры от R0 до R7 включая адрес последней исполняемой инструкции и регистр флагов FLR, а так же сохраняет вектор прерывания, после выполняет переход по полученному из памяти адреса, при вызове IRET ядро выполняет переход доставая адрес возврата из стека и восстанавливая значения регистров R0 - R7, при двойном исключении выполняется прерывание 8 при прерывании во время выполнения обработчика двойного прерывания ядро останавливается
+
+Порядок в котором данные лежат в стеке после прерывания
+Вектор прерывания
+R0
+R1
+R2
+R3
+R4
+R5
+R6
+R7
+FLR
+Адрес возврата
+
+Прерывания
+0 - деление на 0
+4 - переполнение стека
+8 - двойная ошибка
+13 - ошибка общей защиты
+15 - 255 IRQ
+
+Отладчик
+При выполнении инструкции debaghlta включает отладчик ядра процессора, если адрес инструкции на стадии выполнения равен значению из системных регистров DR0-DR3 ядро останавливается, debaghlts выключает этот режим
+
+IO
+Если контроллер IO поддерживает несколько процессорных шин, то через инструкцию setbus можно выбрать системную шину для процессора для взаимодействия с внешними устройствами, малой, средней и высокой пропускной способности
+ID шин
+0 - ISA
+1 - PCI
+2 - PCIE
+
+Инструкция atomIoLC предназначена для атомарных операций с внешними устройствами и позволяет заблокировать шину IO для других ядер на время работы с ней, если другое ядро обратиться к заблокированной шине IO оно будет остановлено до того момента когда шина будет разблокирована, инструкция atomIoUL снимает блокировку
+
+ENG
+The implementation basis depends on the choice of the embedded design and its functionality. Depending on the functionality, there is a ranking by architecture type and embedded design performance.
+
+Core table (figures are given for the 120 nm CMOS process technology and are provided as an example)
+
+| Core type | Architecture | Performance            |   Power consumption  |     Clock frequency    | Number of transistors | Description
+|           |RSM32e |RSM64E|(Instructions per clock)|   (Watts)            |     (MHz)              | (thousands)           |
+--------------------------------------------------------------------------------------------------------------------------------------------
+|     A     |  YES  |  NO  |x32 1	|x64     0.5|(Power)0.7|(Product)3 |(Power)250|(Product)600 |70,000                 |Not expected to deliver high performance for mobile and IoT devices
+--------------------------------------------------------------------------------------------------------------------------------------------
+|     B     |  YES  |  NO  |x32 2       |x64       1|(Power)1  |(Product)7 |(Power)300|(Product)1100|150,000                |A mid-range solution for mobile phones and wearables, expecting mid-range performance and mid-range power consumption
+--------------------------------------------------------------------------------------------------------------------------------------------
+|     C     |  YES  |  YES |x32 6       |x64       2|(Power)3  |(Product)27|(Power)600|(Product)2000|1,000,000              |For high-performance devices and servers
+
+The core pipeline is divided into two types, each used for decoding instructions. The length of 32 and 64 bits depends on the number of pipelines, core performance, and power consumption.
+
+Pipeline Stages
+
+| Fetch | Queue | Queue Expand | Pipe Select | Decode | Manager | Writeback |
+
+Fetch - Load stage. The stage for this instruction is retrieved from the L1 cache.
+Queue - Next instructions. An intermediate stage where the instruction saves the pipeline while stalled during the execution of multiple such instructions.
+Queue Expand - An additional queue stage in case the queue constraint is skipped due to available queue space.
+Pipe Selection - This stage determines which instruction transfer decoder, 32-bit or 64-bit, is used.
+Executor - Execution. This stage is where instructions are calculated and executed.
+Writeback - The stage where execution results and/or calculations are written back.
+
+The cores are made in RISC design and require a very high amount of memory compared to x86, as well as the quality of assembly of instructions by the compiler for comparison code
+
+MOV R0, 0x1
+MOV R1, 0x1
+ADD R1, R0
+
+In x86 it will take 5 bytes, and in RSM e2v 10 bytes, which is approximately twice as much due to the use of the RISC concept versus CISC, but allows for high performance and energy efficiency
+The main concept of the architecture is the redistribution of the maximum amount of resources to direct executors and computers with maximum simplification of decoding and pipeline
+
+Interrupts
+Interrupts are implemented through a table addressing mechanism in the form of a special RIDT register that stores the address of the interrupt table. When an interrupt is called, the core takes the jump address from memory using the RIDT principle + the interrupt vector and then saves all registers from R0 to R7 onto the stack, including the address of the last executable instruction and the FLR flag register, and also saves the interrupt vector, then jumps to the address received from memory. When calling IRET, the core performs a jump by taking the return address from the stack. and restoring the values of registers R0 - R7, when a double exception occurs, interrupt 8 is executed when interrupted while the double interrupt handler is executing, the kernel stops
+
+The order in which data appears on the stack after an interrupt
+Interrupt vector
+R0
+R1
+R2
+R3
+R4
+R5
+R6
+R7
+FLR
+Return address
+
+Interrupts
+0 - division by 0
+4 - stack overflow
+8 - double fault
+13 - general protection error
+15 - 255 IRQ
+
+Debugger
+When executing an instruction, debaghlta turns on the processor core debugger; if the instruction address at the execution stage is equal to the value from the system registers DR0-DR3, the core stops, debaghlts turns off this mode
+
+IO
+If the IO controller supports multiple processor buses, then through the setbus instruction you can select the system bus for the processor to interact with external devices, low, medium and high throughput
+Tire ID
+0 - ISA
+1 - PCI
+2 - PCIE
+
+The atomIoLC instruction is designed for atomic operations with external devices and allows you to block the IO bus for other cores while working with it; if another core accesses the blocked IO bus, it will be stopped until the bus is unlocked, the atomIoUL instruction releases the lock
+
